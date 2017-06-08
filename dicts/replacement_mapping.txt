@@ -1,0 +1,40 @@
+### remove entries
+Gilda's Magic	
+New Member Dinner	
+Foodie Cooking Series	
+Laughing Matters	
+Sisters Networking	
+Exercise(CFFL)	
+Self Taught Reiki	
+Music Concerts	
+New Member Dinner	
+
+### replace entries
+Game Night	Game Nights
+Movie Night	Movie Nights
+Comedy Night	Comedy Nights
+Book Worms	Book Club
+Bridge	Games/Cards
+Crafting	Arts and Crafts
+Movie Madness	Movies
+Knitting	Knitting/Crocheting/Sewing
+Mah Jongg	Games/Cards
+Scrapbooking	Scrapbooking/Card Making
+Legal Planning	Legal/Estate Planning
+Art Workshop	Art Workshops
+Poetry Writing	Poetry and Creative Writing
+Learning to Cook Healthy Meals	Nutrition
+Nutitional Points of View	Nutrition
+Teen Talk	Teens connect
+20"s and 30"s with Cancer Dallas	Young People with Cancer
+Breast Cancer Dallas-Thursday	Breast Cancer
+Breast Cancer Collin- Thursday	Breast Cancer
+Alliance Breast Cancer Networking Group	Breast Cancer
+Brain Cancer (Brainy Bunch) Dallas	Brain Cancer
+Amigos Unidos Dallas- Monday	Amigos Unidos
+Lung Cancer Dallas	Lung Cancer
+Metastic Cancer	Metastic
+Laughter Yoga	Yoga
+### need both due to comma delimiting
+Leukemia	Blood Cancers
+Lymphoma & Myeloma	Blood Cancers
