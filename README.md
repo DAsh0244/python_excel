@@ -1,4 +1,5 @@
-#Python scripts for Excel editing:
+# Python scripts for Excel editing:
+
 A collection of a few scripts I've thrown together to do some 
 tedious work on larg(ish) excel files
 
