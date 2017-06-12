@@ -1,3 +1,8 @@
+'''
+python excel_concat.py JournalExport.xlsx JournalExportCopy-JB.xlsx -H -k -o journal_outputs\test_out.xlsx -c 20000
+'''
+
+
 import os
 import sys
 import openpyxl
@@ -11,13 +16,13 @@ __version__ = '0.0.1'
 
 # cli parser definition
 parser = argparse.ArgumentParser()
+parser.add_argument('file', type=str, nargs='+', help='file(s) to be read in.')
+parser.add_argument('--chunk_size', '-c', type=int, default='100', help='How many entries to write to new file(s). A size less than zero will write to a single file')
+parser.add_argument('--output', '-o', type=str, help='base file name to save as. Resulting files will be incremented on the end. If the path given doesnt exist, it will be made.')
+parser.add_argument('--h_concat', '-H', action="store_true", help='Join files in a sytle of horizontal row appending')
+parser.add_argument('--keep_title', '-k', action="store_true", help='Whether to keep title row in each chunked file or not.')
+parser.add_argument('--no_overwrite', '-n', action="store_true", help='If set, will not overwrite files')
 parser.add_argument('--version', action='version', version=__version__)
-parser.add_argument('file', type=str, nargs='+', help='file(s) name to be read in.')
-parser.add_argument('--h_concat', '-H', action="store_true", help='join files in a sytle of horizontal row appending')
-parser.add_argument('--output', '-o', type=str, help='file name to save as. Will save the next file as file_name_01.extension')
-parser.add_argument('--keep_title', '-k', action="store_true", help='whether to keep title row in each chunkned file or not.')
-parser.add_argument('--dont_overwrite', '-d', action="store_true", help='If set, will not overwrite files')
-parser.add_argument('--chunk_size', '-c', type=int, default='100', help='how many entries to write to new file(s). A size less than zero will write to a single file')
 # parser.add_argument('file', type=argparse.FileType('r'), nargs='+', help='file(s) name to be read in.')
 # parser.add_argument('--sheet', '-s', type=str, nargs='+', help='sheet name to pull data from')
 
@@ -60,27 +65,29 @@ def write_chunked_wbs(wss, chunk_size, concat=False, output=None, keep_title=Tru
         # print('concat')
         # for wb1, wb2 in grouped(wbs, 2):
         for ws1, ws2 in pairwise(wss):
-            new_wb = openpyxl.Workbook()
-            new_ws = new_wb.active
+            # new_wb = openpyxl.Workbook(write_only = True)
+            # print(new_wb)
+            # new_ws = new_wb.create_sheet()
             try:
                 rows1, rows2 =  ws1.rows, ws2.rows 
                 if keep_title:
                     title_1 = row_vals(next(rows1))
-                    title_2 = row_vals(next(rows2))[2:]
+                    title_2 = row_vals(next(rows2))[2:]  # first two cols are duplicate of first two cols of first file
                     # title_2 = list(filter_list(row_vals(next(rows2)), title_1))
                     title_row = flatten([title_1, title_2])
                     # print(title_row)
                 while rows1 or rows2:
-                    new_wb = openpyxl.Workbook()
-                    new_ws = new_wb.active
+                    new_wb = openpyxl.Workbook(write_only=True)
+                    new_ws = new_wb.create_sheet()
                     if keep_title:
                         new_ws.append(title_row)
                     if chunk_size < 0:
                         while True:
-                            new_ws.append(flatten([row_vals(next(rows1)), row_vals(next(rows2)[2:])]))
+                            new_ws.append(flatten([row_vals(next(rows1)), row_vals(next(rows2)[2:])]))  # first two cols are duplicate of first two cols of first file
+                            # new_ws.append(flatten([row_vals(next(rows1)), row_vals(next(rows2))]))
                     else:
                         for line in range(chunk_size):
-                            new_ws.append(flatten([row_vals(next(rows1)), row_vals(next(rows2)[2:])]))
+                            new_ws.append(flatten([row_vals(next(rows1)), row_vals(next(rows2)[2:])]))  # first two cols are duplicate of first two cols of first file
                             # new_ws.append(flatten([row_vals(next(rows1)), row_vals(next(rows2))]))
                     new_wb.save(output)
                     print('wrote {}'.format(output))
@@ -89,22 +96,25 @@ def write_chunked_wbs(wss, chunk_size, concat=False, output=None, keep_title=Tru
             except StopIteration:
                 new_wb.save(output)    
     else: 
-        # raise NotImplementedError('Straight concat is not yet supported.')
         for ws in wss:
-            new_wb = openpyxl.Workbook()
-            new_ws = new_wb.active
+            # new_wb = openpyxl.Workbook(write_only=True)
+            # new_ws = new_wb.create_sheet()
             try:
                 rows1 =  ws1.rows 
                 if keep_title:
                     title_row = row_vals(next(rows1))
                     print(title_row)
                 while rows1:
-                    new_wb = openpyxl.Workbook()
-                    new_ws = new_wb.active
+                    new_wb = openpyxl.Workbook(write_only=True)
+                    new_ws = new_wb.create_sheet()
                     if keep_title:
                         new_ws.append(title_row)
-                    for line in range(chunk_size):
-                        new_ws.append(row_vals(next(rows1)))
+                    if chunk_size < 0:
+                        while True:
+                            new_ws.append(row_vals(next(rows1)))
+                    else:
+                        for line in range(chunk_size):
+                            new_ws.append(row_vals(next(rows1)))
                     new_wb.save(output)
                     print('wrote {}'.format(output))
                     chunk_num += 1
@@ -112,11 +122,21 @@ def write_chunked_wbs(wss, chunk_size, concat=False, output=None, keep_title=Tru
             except StopIteration:
                 new_wb.save(output)    
 
+def ensure_dir(file_path):
+    directory = os.path.dirname(file_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+                
                 
 @time_execution('Total operation')
 def main():
     args = parser.parse_args()
     # print(vars(args))
+    for file in iter(args.file):
+        if not os.path.exists(file):
+            raise OSError
+    if args.output:
+        os.makedirs(os.path.dirname(args.output), exist_ok=True)
     workbooks, worksheets = load_wbs(args)
     write_chunked_wbs(worksheets, args.chunk_size, concat=args.h_concat, 
                       output=args.output, keep_title=args.keep_title)
@@ -124,4 +144,3 @@ def main():
 if __name__ == '__main__':
     main()
     sys.exit(0)
-
