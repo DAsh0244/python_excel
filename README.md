@@ -1,7 +1,7 @@
 # Python scripts for Excel editing:
 
 A collection of a few scripts I've thrown together to do some 
-tedious work on larg(ish) excel files
+tedious work on large(ish) excel files
 
 Most of the replacements are made with replacement LUT files, 
 with examples shown in the [dicts](./dicts) folder 
