@@ -19,6 +19,10 @@ import os as _os
 import logging as _logging
 from openpyxl.utils.cell import *
 
+from collections import namedtuple as _namedtuple
+
+FakeArgs = _namedtuple('FakeArgs', 'file sheet')
+TEST_DIR = _os.path.abspath(_os.path.join(_os.path.pardir,'test_docs'))
 
 __author__ = 'danyal.ahsanullah@gmail.com'
 __version__ = '0.0.2'
