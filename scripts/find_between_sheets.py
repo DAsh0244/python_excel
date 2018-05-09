@@ -1,4 +1,4 @@
-# find name and earilest month found
+# find name and earliest month found
 #
 # name: 
 # - in  A col
@@ -95,12 +95,12 @@ def main(workbooks, output=None):
     if not output.isatty():
         output.close()
     
-        
-if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('workbooks', nargs='+', type=str, action='store')
     parser.add_argument('--output', '-o', type=str, action='store', default=None)
     parser.add_argument('--file', '-f', action='store_true')
+        
+if __name__ == '__main__':
     args = parser.parse_args()
     if args.file:
         files = []

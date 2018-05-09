@@ -6,6 +6,16 @@ import os.path as osp
 from common import *
 from collections import OrderedDict
 from datetime import datetime
+from math import isnan
+import argparse
+from glob import glob
+from itertools import chain
+
+parser = argparse.ArgumentParser()
+parser.add_argument('workbooks',action='store',nargs='+')
+parser.add_argument('--sheets','-s',action='store',nargs='*')
+parser.add_argument('--glob','-g',action='store_true')
+
 
 class BadPersonExcpetion(Exception):
     pass
@@ -36,6 +46,10 @@ class person:
 
     def __init__(self, record):
         self.info = {key:(record.get(key,'N/A') or 'N/A') for key in self.good_keys}
+        if not isinstance(self.info['age_group'],int):
+            # print('fixing_age for {}'.format(self.full_name) )
+            # print('was {}, now nan'.format(self.info['age_group']) )
+            self.info['age_group'] = float('nan')
         if not isinstance( self.info['date'],datetime): 
              self.info['date'] = datetime(self.info['date'])
         
@@ -98,48 +112,54 @@ def print_dict_with_persons(dict):
             for person in _ppl:
                 print(person.info)
 
-                
-
             
 if __name__ == '__main__':
     import sys
-       
-    paths = sys.argv[1:]
+    args = parser.parse_args()
+    # print(vars(args))
+    # sys.exit()
+    # paths = sys.argv[1:]
     persons = []
-    for path in paths:
+    if args.glob:
+        print('wildcarded')
+        args.workbooks = chain.from_iterable([glob(osp.join(TEST_DIR,wb)) for wb in args.workbooks])
+    for path in args.workbooks:
         print(path)
-        wb,ws = get_workbook(FakeArgs(osp.join(TEST_DIR,path),None))
+        wb= get_workbook(FakeArgs(path,None))[0]
         rets = {}
-    # for ws in worksheets:
-        try: 
-            # worksheet = wb.get_sheet_by_name(ws)
-            for row in ws:
-                try:        
-                    record = parse_row(row,title_mapping)
-                    per = person(record)
-                    index = next((i for i,x in enumerate(persons) if x == per), None)
-                    if index is not None:
-                        # print('found person {}'.format(per.full_name))
-                        # print('record date:{}'.format(per.info['date']))
-                        # print('found person in persons: {}'.format(persons[index].full_name))
-                        # print('persons date:{}'.format(persons[index].info['date']))
-                        # print(persons[index])
-                        # print(record)
-                        persons[index].check_date(record)
-                        
-                    else:
-                        persons.append(per)
-                except BadPersonExcpetion:
-                    pass
-                except Exception as e:
-                    print('throwing row:{} unable to parse...'.format(row[0].row))
-                    pass
-            rets[ws] = persons
-        except Exception as e:
-            print(e)
-            print(row)
-            print(record)
-            print(per)
+        for sheet in args.sheets:
+            print(sheet)
+            try: 
+                ws = wb.get_sheet_by_name(sheet)
+                for row in ws:
+                    try:        
+                        record = parse_row(row,title_mapping)
+                        per = person(record)
+                        index = next((i for i,x in enumerate(persons) if x == per), None)
+                        if index is not None:
+                            # print('found person {}'.format(per.full_name))
+                            # print('record date:{}'.format(per.info['date']))
+                            # print('found person in persons: {}'.format(persons[index].full_name))
+                            # print('persons date:{}'.format(persons[index].info['date']))
+                            # print(persons[index])
+                            # print(record)
+                            persons[index].check_date(record)
+                            
+                        else:
+                            persons.append(per)
+                    except BadPersonExcpetion:
+                        pass
+                    except Exception as e:
+                        print('throwing row:{} unable to parse...'.format(row[0].row))
+                        pass
+                rets[ws] = persons
+            except Exception as e:
+                print(e)
+                print(row)
+                print(record)
+                print(per)
+            wb.close()
+            
     
     # # dump records to file
     # for place,persons in rets.items():
@@ -156,7 +176,7 @@ if __name__ == '__main__':
     print('\n\n')
       
     
-    persons = [person for person in persons if person.info['date'].month == 2]
+    # persons = [person for person in persons if person.info['date'].month == 2]
     
     # # analysis of good records:
     participant_types = set(person.info['participant_type'] for person in persons)
@@ -173,9 +193,9 @@ if __name__ == '__main__':
     def split_participants_by_age(_participant_type):
         temp = split_by_participant_type[_participant_type]
         return {
-               '>=18': [person for person in temp if person.info['age_group'].startswith('Adult')],
-               '<18':[person for person in temp if person.info['age_group'].startswith('Child') or person.info['age_group'].startswith('Infant')],
-               'Unknown':[person for person in temp if person.info['age_group'].startswith('N/A') or person.info['age_group'].startswith('Select')]
+               '>=18': [person for person in temp if person.info['age_group'] >= 18],
+               '<18':[person for person in temp if person.info['age_group'] < 18],
+               'Unknown':[person for person in temp if isnan(person.info['age_group'] )]
               }
   
     # Living With Cancer 
@@ -215,7 +235,7 @@ if __name__ == '__main__':
         # print(name)
         # print(split)
         
-    with open(osp.join(osp.dirname(path),'{}_{}.csv'.format('stats','3')),'w') as outfile:
+    with open(osp.join(osp.dirname(path),'{}_{}.csv'.format('stats','7')),'w') as outfile:
         for name,split in [('split_cancer_by_age',split_cancer_by_age),
                                ('support_people',support_people),
                                ('survivors',survivors),
