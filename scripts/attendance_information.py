@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 '''
  attendance_information.py "Attendance_2\February 2018 Attendance with Demographics.xlsx" "Dallas" "Tarrant" "Collin"
 
