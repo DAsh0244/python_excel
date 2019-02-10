@@ -256,7 +256,7 @@ if __name__ == '__main__':
         # print(name)
         # print(split)
 
-    with open(osp.join(osp.dirname(path),'{}_{}.csv'.format('stats','7')),'w') as outfile:
+    with open(osp.join(osp.dirname(path),'{}_{}.csv'.format('stats','8')),'w') as outfile:
         for name,split in [('split_cancer_by_age',split_cancer_by_age),
                                ('support_people',support_people),
                                ('survivors',survivors),
