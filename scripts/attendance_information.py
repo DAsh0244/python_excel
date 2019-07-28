@@ -19,7 +19,8 @@ for sheet in wb:
 with open('event_count.json', 'w') as file:
     file.write(json.dumps(stats))
 
-
+Column Y  is “Sexual Orientation”
+For sorting add additional field of “Bereaved” for Participant Type from Column P.
 
 '''
 
@@ -47,22 +48,23 @@ class person:
         criteria: column N "Participant Status" MUST BE "Participant"
 
         has fields:
-            first name: col "G" ("First Name")
-            last name: col "H" ("Last Name")
+            first_name: col "G" ("First Name")
+            last_name: col "H" ("Last Name")
             type: col "O" ("Participant Type")
             gender: col "P" ("Gender")
-            age group: col "Q" ("Age Group")
+            age_group: col "Q" ("Age Group")
             ethnicity: col "R" ("Ethnicity")
             insurance: col "S" ("Insurance")
             employment: col "T" ("Type of Employment")
             income: col "U" ("Income")
             cancer: col "V" ("Primary Cancer")
+            sexual_orientation: col "Y" ("Sexual Orentation")
             earliest attended event: earliest(col "A" ("Attendance Date"))
     """
     good_keys = {'pid', 'first_name', 'last_name', 'date', 'clubhouse',
                  'volunteer', 'participant_stat', 'participant_type',
                  'gender', 'age_group', 'ethnicity', 'insurance',
-                 'employment', 'income', 'cancer'
+                 'employment', 'income', 'cancer','sexual_orientation'
                  }
 
     def __init__(self, record):
@@ -74,7 +76,6 @@ class person:
         if not isinstance( self.info['date'],datetime):
              self.info['date'] = datetime(self.info['date'])
 
-
     @property
     def full_name(self):
         return '_'.join(str(self.info[x]) for x in ('first_name','last_name','pid'))
@@ -84,7 +85,6 @@ class person:
 
     def __hash__(self):
         return hash(self.full_name)
-
 
     def check_date(self,record):
         if self.info['date'] > record['date']:
@@ -112,9 +112,10 @@ title_mapping = {
                  'employment':  "V" ,
                  'income':  "W" ,
                  'cancer':  "X" ,
+                 'sexual_orientation': "Y",
                  }
 title_list =('pid', 'first_name', 'last_name', 'date', 'clubhouse','volunteer', 'participant_stat', 'participant_type', 'gender',
-'age_group', 'ethnicity', 'insurance', 'employment', 'income', 'cancer')
+'age_group', 'ethnicity', 'insurance', 'employment', 'income', 'cancer','sexual_orientation')
 
 def parse_row(row,col_mapping):
     x = {}
